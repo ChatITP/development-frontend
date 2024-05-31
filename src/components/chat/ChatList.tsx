@@ -16,7 +16,3 @@ const ChatList = forwardRef<HTMLDivElement, { messages: { text: string; sender: 
 ChatList.displayName = 'ChatList';
 
 export default ChatList;
-
-
-
-

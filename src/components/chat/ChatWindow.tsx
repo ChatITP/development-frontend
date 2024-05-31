@@ -1,19 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatList from './ChatList';
 import ChatBottombar from './ChatBottombar';
+import axios from 'axios';
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
   const chatListRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = async (message: string) => {
     setMessages([...messages, { text: message, sender: 'user' }]);
-    setTimeout(() => {
+
+    try {
+      const response = await axios.post('http://localhost:3001/', {
+        systemPrompt: 'You are a helpful assistant.', 
+        userPrompt: message,
+      });
+
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: 'Some AI response to: ' + message, sender: 'ai' },
+        { text: response.data.content, sender: 'ai' },
       ]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: 'Failed to get a response from the the model.', sender: 'ai' },
+      ]);
+    }
   };
 
   useEffect(() => {
@@ -31,4 +44,3 @@ const ChatWindow = () => {
 };
 
 export default ChatWindow;
-
