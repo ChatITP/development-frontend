@@ -13,7 +13,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className={`flex flex-col min-h-screen w-screen overflow-x-hidden ${inter.className}`}>
       <Navbar />
-      <main className="flex-grow p-4 md:p-12 items-center justify-between">
+      <main className="flex-grow  items-center justify-between">
         {children}
       </main>
       <Footer />
