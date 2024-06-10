@@ -9,11 +9,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2Icon } from 'lucide-react';
 
 interface Prompt {
-  _id: number;
-  filename: string;
+  _id: string; 
+  title: string;
   type: string;
   system_prompt: string;
   main_prompt: string;
@@ -22,15 +33,15 @@ interface Prompt {
 
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [filename, setFilename] = useState<string>('');
-  const [promptType, setPromptType] = useState<string>(
-    'itp_collective_consciousness_model',
-  );
+  const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
+  const [title, setTitle] = useState<string>('');
+  const [promptType, setPromptType] = useState<string>('itp_collective_consciousness_model');
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [userPrompt, setUserPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [promptToDelete, setPromptToDelete] = useState<Prompt | null>(null);
 
   useEffect(() => {
     fetchPrompts();
@@ -40,7 +51,7 @@ const PromptsPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/prompts');
+      const response = await fetch('http://localhost:3001/db/prompts');
       const data = await response.json();
       setPrompts(data);
     } catch (error) {
@@ -55,32 +66,75 @@ const PromptsPage: React.FC = () => {
     setError(null);
     setSuccess(null);
     try {
-      const response = await fetch('/api/prompts', {
-        method: 'POST',
-        body: JSON.stringify({
-          filename,
-          type: promptType,
-          system_prompt: systemPrompt,
-          main_prompt: userPrompt,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = currentPromptId 
+        ? await fetch(`http://localhost:3001/db/prompts/${currentPromptId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              title,
+              type: promptType,
+              system_prompt: systemPrompt,
+              main_prompt: userPrompt,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+        : await fetch('http://localhost:3001/db/prompts', {
+            method: 'POST',
+            body: JSON.stringify({
+              title,
+              type: promptType,
+              system_prompt: systemPrompt,
+              main_prompt: userPrompt,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+      
+      if (!response.ok) {
+        throw new Error(currentPromptId ? 'Failed to update the prompt' : 'Failed to save the prompt');
+      }
+      setSuccess(currentPromptId ? 'Prompt updated successfully!' : 'Prompt saved successfully!');
+      fetchPrompts();
+      setCurrentPromptId(null); // Reset current prompt ID after save
+    } catch (error) {
+      setError(currentPromptId ? 'Failed to update prompt. Please try again later.' : 'Failed to save prompt. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmDeletePrompt = (prompt: Prompt) => {
+    setPromptToDelete(prompt);
+  };
+
+  const deletePrompt = async () => {
+    if (!promptToDelete) return;
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await fetch(`http://localhost:3001/db/prompts/${promptToDelete._id}`, {
+        method: 'DELETE',
       });
       if (!response.ok) {
-        throw new Error('Failed to save the prompt');
+        throw new Error('Failed to delete the prompt');
       }
-      setSuccess('Prompt saved successfully!');
+      setSuccess('Prompt deleted successfully!');
       fetchPrompts();
+      setPromptToDelete(null); // Reset the prompt to delete after deletion
     } catch (error) {
-      setError('Failed to save prompt. Please try again later.');
+      setError('Failed to delete prompt. Please try again later.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const loadPrompt = (prompt: Prompt) => {
-    setFilename(prompt.filename);
+    setCurrentPromptId(prompt._id);
+    setTitle(prompt.title);
     setPromptType(prompt.type);
     setSystemPrompt(prompt.system_prompt);
     setUserPrompt(prompt.main_prompt);
@@ -102,27 +156,46 @@ const PromptsPage: React.FC = () => {
               prompts.map((prompt) => (
                 <div
                   key={prompt._id}
-                  onClick={() => loadPrompt(prompt)}
-                  className="p-3 bg-white rounded shadow cursor-pointer hover:bg-gray-100 transition"
+                  className="p-3 bg-white rounded-lg border border-neutral-200 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition"
                 >
-                  <h3 className="font-bold">{prompt.filename}</h3>
-                  <p className="text-sm text-gray-500">{prompt.type}</p>
+                  <div onClick={() => loadPrompt(prompt)}>
+                    <h3 className="font-bold">{prompt.title}</h3>
+                    <p className="text-sm text-gray-500">{prompt.type}</p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" onClick={() => confirmDeletePrompt(prompt)}>
+                        <Trash2Icon className='h-4 w-4'/>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the prompt.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPromptToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={deletePrompt}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               ))
             )}
           </div>
         </aside>
-
         <main className="w-full lg:w-2/3 bg-white p-6 rounded-lg border border-neutral-200">
-          <h2 className="text-xl font-semibold mb-4">Edit Prompt</h2>
+        <h2 className="text-xl font-semibold mb-4">Edit Prompt</h2>
           <div className="mb-4">
             <Input
               type="text"
-              id="filename"
-              name="filename"
+              id="title"
+              name="title"
               placeholder="Prompt title"
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="mb-4">
@@ -149,11 +222,11 @@ const PromptsPage: React.FC = () => {
               id="system-prompt-editor"
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
-              rows={5}
+              rows={25}
               className="w-full"
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-700 mb-2">User Prompt</label>
             <Textarea
               id="main-prompt-editor"
@@ -162,18 +235,15 @@ const PromptsPage: React.FC = () => {
               rows={5}
               className="w-full"
             />
-          </div>
+          </div> */}
+          <Button onClick={savePrompt} disabled={isLoading} className="px-6 py-2 w-full">
+          Save Prompt
+        </Button>
         </main>
       </div>
 
       <footer className="mt-8 flex justify-end">
-        <Button onClick={savePrompt} disabled={isLoading} className="px-6 py-2">
-          Save Prompt
-        </Button>
       </footer>
-
-      {error && <Alert className="mt-4">{error}</Alert>}
-      {success && <Alert className="mt-4">{success}</Alert>}
     </div>
   );
 };

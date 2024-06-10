@@ -4,23 +4,48 @@ import ChatBottombar from './ChatBottombar';
 import axios from 'axios';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
-const prompts = [
-  'You are a helpful assistant.',
-  'You are a knowledgeable professor.',
-  'You are a meme artist.',
-];
+interface Prompt {
+  _id: string;
+  title: string;
+  type: string;
+  system_prompt: string;
+  main_prompt: string;
+  created_at: Date;
+}
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
-  const [selectedPrompt, setSelectedPrompt] = useState(prompts[0]);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const chatListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/db/prompts');
+        setPrompts(response.data);
+        setSelectedPrompt(response.data[0]?.system_prompt || '');
+      } catch (error) {
+        console.error('Error fetching prompts:', error);
+      }
+    };
+    
+    fetchPrompts();
+  }, []);
+
+  const initializeConversation = async (systemPrompt: string) => {
+    try {
+      await axios.post('http://localhost:3001/initialize', { systemPrompt });
+    } catch (error) {
+      console.error('Error initializing conversation:', error);
+    }
+  };
 
   const handleSendMessage = async (message: string) => {
     setMessages([...messages, { text: message, sender: 'user' }]);
 
     try {
       const response = await axios.post('http://localhost:3001/', {
-        systemPrompt: selectedPrompt,
         userPrompt: message,
       });
 
@@ -36,6 +61,12 @@ const ChatWindow = () => {
       ]);
     }
   };
+
+  useEffect(() => {
+    if (selectedPrompt) {
+      initializeConversation(selectedPrompt);
+    }
+  }, [selectedPrompt]);
 
   useEffect(() => {
     if (chatListRef.current) {
@@ -57,9 +88,9 @@ const ChatWindow = () => {
             <SelectValue placeholder="Select a prompt" />
           </SelectTrigger>
           <SelectContent>
-            {prompts.map((prompt, index) => (
-              <SelectItem key={index} value={prompt}>
-                {prompt}
+            {prompts.map((prompt) => (
+              <SelectItem key={prompt._id} value={prompt.system_prompt}>
+                {prompt.title}
               </SelectItem>
             ))}
           </SelectContent>
@@ -72,4 +103,3 @@ const ChatWindow = () => {
 };
 
 export default ChatWindow;
-
