@@ -7,7 +7,7 @@ export const nodeTypes: NodeTypes = {
     type: 'chatInputNode',
     data: {
       label: 'Chat Input',
-      description: 'Get chat inputs from the Interaction Panel.',
+      description: '',
       fields: [
         { name: 'message', label: 'Message', type: 'text', placeholder: 'Type your message here' },
         { name: 'sender', label: 'Sender Name', type: 'text', placeholder: 'User' },
@@ -17,7 +17,7 @@ export const nodeTypes: NodeTypes = {
     },
     handles: {
       inputs: [],
-      outputs: [{ id: 'output-1', position: Position.Right, type: 'source' }],
+      outputs: [{ id: 'output-1', position: Position.Right, type: 'source', fieldName:'' }],
     },
   },
   promptNode: {
@@ -28,14 +28,17 @@ export const nodeTypes: NodeTypes = {
       description: 'Create a prompt template.',
       fields: [
         { name: 'template', label: 'Template', type: 'text', placeholder: 'Enter your template' },
-        { name: 'user_input', label: 'user_input', type: 'text', placeholder: 'Enter user input' },
+        { name: 'user_input', label: 'User Input', type: 'text', placeholder: 'Enter user input' },
       ],
       formData: {},
       onChange: (id, data) => {},
     },
     handles: {
-      inputs: [{ id: 'input-1', position: Position.Left, type: 'target' }],
-      outputs: [{ id: 'output-1', position: Position.Right, type: 'source' }],
+      inputs: [
+        { id: 'input-template', position: Position.Left, type: 'target', fieldName: 'template' },
+        { id: 'input-user_input', position: Position.Left, type: 'target', fieldName: 'user_input' },
+      ],
+      outputs: [{ id: 'output-text', position: Position.Right, type: 'source', fieldName:'' }],
     },
   },
   modelNode: {
@@ -46,6 +49,7 @@ export const nodeTypes: NodeTypes = {
       description: 'Generates text using LLM.',
       fields: [
         { name: 'modelName', label: 'Model Name', type: 'text', placeholder: 'llama-3' },
+        { name: 'input', label: 'Input', type: 'text', placeholder: 'Type something...' },
         { name: 'apiKey', label: 'API Key', type: 'text', placeholder: 'Enter your API key' },
         { name: 'temperature', label: 'Temperature', type: 'number', placeholder: '0.1' },
       ],
@@ -53,8 +57,11 @@ export const nodeTypes: NodeTypes = {
       onChange: (id, data) => {},
     },
     handles: {
-      inputs: [{ id: 'input-1', position: Position.Left, type: 'target' }],
-      outputs: [{ id: 'output-1', position: Position.Right, type: 'source' }],
+      inputs: [
+        { id: 'input-modelName', position: Position.Left, type: 'target', fieldName: 'modelName' },
+        { id: 'input-input', position: Position.Left, type: 'target', fieldName: 'input' },
+      ],
+      outputs: [{ id: 'output-1', position: Position.Right, type: 'source', fieldName:'' }],
     },
   },
   chatOutputNode: {
@@ -71,7 +78,7 @@ export const nodeTypes: NodeTypes = {
       onChange: (id, data) => {},
     },
     handles: {
-      inputs: [{ id: 'input-1', position: Position.Left, type: 'target' }],
+      inputs: [{ id: 'input-1', position: Position.Left, type: 'target', fieldName:'' }],
       outputs: [],
     },
   },
@@ -88,9 +95,8 @@ export const nodeTypes: NodeTypes = {
       onChange: (id, data) => {},
     },
     handles: {
-      inputs: [{ id: 'input-1', position: Position.Left, type: 'target' }],
+      inputs: [{ id: 'input-1', position: Position.Left, type: 'target', fieldName:'' }],
       outputs: [],
     },
   },
 };
-

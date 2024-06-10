@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaList, FaBars, FaDatabase } from 'react-icons/fa';
+import { FaList, FaBars } from 'react-icons/fa';
+import { SquareChevronRight, Database, Workflow, MessageCircle } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
@@ -20,14 +21,28 @@ const Sidebar: React.FC = () => {
             <li className="mb-4">
               <Link href="/flows">
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
-                  <FaList className="mr-2" /> Flows
+                  <Workflow className="mr-2" /> Flows
                 </p>
               </Link>
             </li>
-            <li>
+            <li className="mb-4">
               <Link href="/data">
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
-                  <FaDatabase className="mr-2" /> Data
+                  <Database className="mr-2" /> Data
+                </p>
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link href="/prompts">
+                <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
+                  <SquareChevronRight className="mr-2" /> Prompts
+                </p>
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link href="/chat">
+                <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
+                  <MessageCircle className="mr-2" /> Chat
                 </p>
               </Link>
             </li>

@@ -1,5 +1,6 @@
+// CustomNode.tsx
 import React, { useState } from 'react';
-import { Handle, NodeProps, Position } from 'reactflow';
+import { Handle, NodeProps } from 'reactflow';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -22,7 +23,7 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
 
-    // update the node's data in the parent state
+    // Update the node's data in the parent state
     data.onChange(id, { ...data, formData: { ...formData, [name]: value } });
   };
 
@@ -41,6 +42,11 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
       data.onChange(id, { ...data, formData: { ...formData, [currentField]: dialogValue } });
     }
     closeDialog();
+  };
+
+  const handleRun = () => {
+    console.log('Running with data:', formData);
+    // Here you would collect data from all connected nodes and send it to the backend
   };
 
   const nodeConfig = nodeTypes[type as keyof typeof nodeTypes];
@@ -78,22 +84,29 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
             </div>
           </div>
         ))}
-        {nodeConfig.handles.inputs.map((input: HandleConfig) => (
+        {type === 'chatOutputNode' && (
+          <button onClick={handleRun} className="mt-4 p-2 bg-blue-500 text-white rounded">
+            Run
+          </button>
+        )}
+        {nodeConfig.handles.inputs.map((input: HandleConfig, index: number) => (
           <Handle
             key={input.id}
             id={input.id}
             type={input.type}
             position={input.position}
             className="w-2 h-2 bg-blue-500"
+            style={{ top: `${140 + index * 100}px` }} 
           />
         ))}
-        {nodeConfig.handles.outputs.map((output: HandleConfig) => (
+        {nodeConfig.handles.outputs.map((output: HandleConfig, index: number) => (
           <Handle
             key={output.id}
             id={output.id}
             type={output.type}
             position={output.position}
             className="w-2 h-2 bg-blue-500"
+            style={{ bottom: `${20 + index * 50}px` }} 
           />
         ))}
       </CardContent>
@@ -112,3 +125,4 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
 };
 
 export default CustomNode;
+

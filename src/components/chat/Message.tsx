@@ -9,7 +9,7 @@ export const Message = ({ text, sender }: { text: string; sender: string }) => {
 
   return (
     <div className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
-      <Card className={`p-3 rounded-lg max-w-xs ${messageStyles}`}>
+      <Card className={`p-3 rounded-lg max-w-md ${messageStyles}`}>
         {text}
       </Card>
     </div>

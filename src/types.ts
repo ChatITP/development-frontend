@@ -4,6 +4,7 @@ export interface HandleConfig {
   id: string;
   position: Position;
   type: 'source' | 'target';
+  fieldName: string; 
 }
 
 export interface Field {
