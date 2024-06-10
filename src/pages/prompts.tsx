@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert } from '@/components/ui/alert'; 
+import { Alert } from '@/components/ui/alert';
 
 interface Prompt {
   _id: number;
@@ -17,7 +23,9 @@ interface Prompt {
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [filename, setFilename] = useState<string>('');
-  const [promptType, setPromptType] = useState<string>('itp_collective_consciousness_model');
+  const [promptType, setPromptType] = useState<string>(
+    'itp_collective_consciousness_model',
+  );
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [userPrompt, setUserPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -105,7 +113,6 @@ const PromptsPage: React.FC = () => {
           </div>
         </aside>
 
-        {/* Prompt Editor */}
         <main className="w-full lg:w-2/3 bg-white p-6 rounded-lg border border-neutral-200">
           <h2 className="text-xl font-semibold mb-4">Edit Prompt</h2>
           <div className="mb-4">
@@ -124,9 +131,15 @@ const PromptsPage: React.FC = () => {
                 <SelectValue placeholder="Select prompt type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="itp_collective_consciousness_model">ITP Collective Consciousness Model</SelectItem>
-                <SelectItem value="itp_creative_exploration_17">ITP Creative Exploration 17</SelectItem>
-                <SelectItem value="itp_artistic_expression_prompt">ITP Artistic Expression Prompt</SelectItem>
+                <SelectItem value="itp_collective_consciousness_model">
+                  ITP Collective Consciousness Model
+                </SelectItem>
+                <SelectItem value="itp_creative_exploration_17">
+                  ITP Creative Exploration 17
+                </SelectItem>
+                <SelectItem value="itp_artistic_expression_prompt">
+                  ITP Artistic Expression Prompt
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -159,16 +172,8 @@ const PromptsPage: React.FC = () => {
         </Button>
       </footer>
 
-      {error && (
-        <Alert className="mt-4">
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert className="mt-4">
-          {success}
-        </Alert>
-      )}
+      {error && <Alert className="mt-4">{error}</Alert>}
+      {success && <Alert className="mt-4">{success}</Alert>}
     </div>
   );
 };

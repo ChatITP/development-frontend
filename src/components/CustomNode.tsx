@@ -1,4 +1,3 @@
-// CustomNode.tsx
 import React, { useState } from 'react';
 import { Handle, NodeProps } from 'reactflow';
 import { Input } from '@/components/ui/input';
@@ -23,7 +22,6 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
 
-    // Update the node's data in the parent state
     data.onChange(id, { ...data, formData: { ...formData, [name]: value } });
   };
 
@@ -46,7 +44,6 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ id, data, type }) => {
 
   const handleRun = () => {
     console.log('Running with data:', formData);
-    // Here you would collect data from all connected nodes and send it to the backend
   };
 
   const nodeConfig = nodeTypes[type as keyof typeof nodeTypes];
