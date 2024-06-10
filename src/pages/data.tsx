@@ -9,9 +9,9 @@ const DataPage: FC = () => {
     <div className="m-16">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Database</h1>
-        <Button variant="outline" className="flex items-center px-4 py-2  rounded-lg">
+        {/* <Button variant="outline" className="flex items-center px-4 py-2  rounded-lg">
           <FaPlus className="mr-2" /> Add New 
-        </Button>
+        </Button> */}
       </div>
       <DataTable />
     </div>
