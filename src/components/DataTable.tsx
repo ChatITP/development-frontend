@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; 
 import {
   Table,
   TableBody,
@@ -36,7 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { DataTablePagination } from "@/components/ui/data-table-pagination"; // Adjust the import path as necessary
+import { DataTablePagination } from "@/components/ui/data-table-pagination"; 
 
 interface User {
   _id: string;
@@ -77,7 +78,6 @@ interface Project {
   instructors: any[];
 }
 
-
 export function DataTable() {
   const [data, setData] = React.useState<Project[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -89,11 +89,41 @@ export function DataTable() {
   const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
   const [pageCount, setPageCount] = React.useState(0);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isEditMode, setIsEditMode] = React.useState(false);
   const [currentProject, setCurrentProject] = React.useState<Project | null>(null);
 
   const handleViewDetails = (project: Project) => {
     setCurrentProject(project);
+    setIsEditMode(false);
     setIsDialogOpen(true);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setCurrentProject(project);
+    setIsEditMode(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (currentProject) {
+      setCurrentProject({
+        ...currentProject,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentProject) {
+      try {
+        await axios.put(`http://localhost:3001/db/updateProject/${currentProject.project_id}`, currentProject);
+        setIsDialogOpen(false);
+        fetchProjects(pagination.pageIndex, pagination.pageSize);
+      } catch (error) {
+        console.error("Failed to update project:", error);
+      }
+    }
   };
 
   const columns: ColumnDef<Project>[] = [
@@ -169,6 +199,7 @@ export function DataTable() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleViewDetails(project)}>View details</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleEditProject(project)}>Edit</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -179,8 +210,8 @@ export function DataTable() {
   const fetchProjects = async (pageIndex: number, pageSize: number) => {
     try {
       const offset = pageIndex * pageSize;
-      const response = await axios.get(`http://localhost:3001/db/getPaginated?limit=${pageSize}&offset=${offset}`);
-      const countResponse = await axios.get("http://localhost:3001/db/projectCount");
+      const response = await axios.get(`http://localhost:3001/db/getCleanPaginated?limit=${pageSize}&offset=${offset}`);
+      const countResponse = await axios.get("http://localhost:3001/db/cleanProjectCount");
       const projects = response.data.map((project: Project) => ({
         ...project,
         user_name: project.users[0]?.user_name || 'N/A',
@@ -325,13 +356,79 @@ export function DataTable() {
 
       <DataTablePagination table={table} />
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-screen my-6 overflow-y-auto">
+        <DialogContent className="max-w-4xl h-5/6 overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Project Details</DialogTitle>
+            <DialogTitle>{isEditMode ? "Edit Project" : "Project Details"}</DialogTitle>
           </DialogHeader>
-          <DialogDescription>
-          </DialogDescription>
           {currentProject ? (
+            isEditMode ? (
+              <form onSubmit={handleFormSubmit} className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-1">
+                  <label htmlFor="project_id" className="block text-sm font-medium text-gray-700">Project ID</label>
+                  <Input name="project_id" value={currentProject.project_id} onChange={handleInputChange} disabled />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="project_name" className="block text-sm font-medium text-gray-700">Project Name</label>
+                  <Input name="project_name" value={currentProject.project_name} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="keywords" className="block text-sm font-medium text-gray-700">Keywords</label>
+                  <Input name="keywords" value={currentProject.keywords} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="audience" className="block text-sm font-medium text-gray-700">Audience</label>
+                  <Input name="audience" value={currentProject.audience} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="elevator_pitch" className="block text-sm font-medium text-gray-700">Elevator Pitch</label>
+                  <Textarea name="elevator_pitch" value={currentProject.elevator_pitch} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                  <Textarea name="description" value={currentProject.description} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="background" className="block text-sm font-medium text-gray-700">Background</label>
+                  <Textarea name="background" value={currentProject.background} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="user_scenario" className="block text-sm font-medium text-gray-700">User Scenario</label>
+                  <Textarea name="user_scenario" value={currentProject.user_scenario} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="technical_system" className="block text-sm font-medium text-gray-700">Technical System</label>
+                  <Textarea name="technical_system" value={currentProject.technical_system} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="url" className="block text-sm font-medium text-gray-700">URL</label>
+                  <Input name="url" value={currentProject.url} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="project_references" className="block text-sm font-medium text-gray-700">Project References</label>
+                  <Textarea name="project_references" value={currentProject.project_references} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="timestamp" className="block text-sm font-medium text-gray-700">Timestamp</label>
+                  <Input name="timestamp" value={currentProject.timestamp} onChange={handleInputChange} disabled />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="personal_statement" className="block text-sm font-medium text-gray-700">Personal Statement</label>
+                  <Textarea name="personal_statement" value={currentProject.personal_statement} onChange={handleInputChange} />
+                </div>
+                <div className="col-span-1">
+                  <label htmlFor="sustain" className="block text-sm font-medium text-gray-700">Sustain</label>
+                  <Textarea name="sustain" value={currentProject.sustain} onChange={handleInputChange} />
+                </div>
+                <DialogFooter className="col-span-2">
+                  <Button type="submit">Save Changes</Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="ghost">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            ) : (
               <div className="space-y-4">
                 <p><strong>ID:</strong> {currentProject.project_id}</p>
                 <p><strong>Project Name:</strong> {currentProject.project_name}</p>
@@ -349,9 +446,10 @@ export function DataTable() {
                 <p><strong>Personal Statement:</strong> {currentProject.personal_statement}</p>
                 <p><strong>Sustain:</strong> {currentProject.sustain}</p>
               </div>
-            ) : (
-              <p>Loading...</p>
-            )}
+            )
+          ) : (
+            <p>Loading...</p>
+          )}
           <DialogFooter>
             <DialogClose asChild>
             </DialogClose>
