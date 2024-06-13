@@ -2,7 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatList from './ChatList';
 import ChatBottombar from './ChatBottombar';
 import axios from 'axios';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 interface Prompt {
   _id: string;
@@ -14,7 +20,9 @@ interface Prompt {
 }
 
 const ChatWindow = () => {
-  const [messages, setMessages] = useState<{ text: string; sender: string }[]>([]);
+  const [messages, setMessages] = useState<{ text: string; sender: string }[]>(
+    [],
+  );
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const chatListRef = useRef<HTMLDivElement>(null);
@@ -29,13 +37,15 @@ const ChatWindow = () => {
         console.error('Error fetching prompts:', error);
       }
     };
-    
+
     fetchPrompts();
   }, []);
 
   const initializeConversation = async (systemPrompt: string) => {
     try {
-      await axios.post('http://localhost:3001/initialize', { systemPrompt });
+      await axios.post('http://localhost:3001/llm/initialize', {
+        systemPrompt,
+      });
     } catch (error) {
       console.error('Error initializing conversation:', error);
     }
@@ -45,7 +55,7 @@ const ChatWindow = () => {
     setMessages([...messages, { text: message, sender: 'user' }]);
 
     try {
-      const response = await axios.post('http://localhost:3001/', {
+      const response = await axios.post('http://localhost:3001/llm/generate', {
         userPrompt: message,
       });
 
@@ -77,7 +87,10 @@ const ChatWindow = () => {
   return (
     <div className="flex flex-col h-full w-full p-4 bg-white rounded-lg border border-neutral-300">
       <div className="mb-4">
-        <label htmlFor="promptSelector" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="promptSelector"
+          className="block text-sm font-medium text-gray-700"
+        >
           Select a Prompt:
         </label>
         <Select
