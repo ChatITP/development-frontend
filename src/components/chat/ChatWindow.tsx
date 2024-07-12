@@ -41,6 +41,7 @@ const ChatWindow = () => {
       }
     };
 
+    // sessions 
     const fetchSessionIds = async () => {
       try {
         const response = await axios.get('http://localhost:3001/llm/sessions');
