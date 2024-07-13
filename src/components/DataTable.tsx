@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { request } from '@/lib/request';
+import axios from 'axios';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -141,7 +142,7 @@ export function DataTable() {
         currentProject,
       );
       setIsDialogOpen(false);
-      fetchProjects(pagination.pageIndex, pagination.pageSize);
+      fetchProjects(pagination.pageIndex, pagination.pageSize, searchQuery);
     }
   };
 
@@ -228,14 +229,38 @@ export function DataTable() {
     },
   ];
 
-  const fetchProjects = async (pageIndex: number, pageSize: number) => {
-    const offset = pageIndex * pageSize;
-    const response = await request(
-      'GET',
-      `http://localhost:3001/db/getCleanPaginated?limit=${pageSize}&offset=${offset}`,
-    );
-    if (!response) {
-      throw new Error('Failed to fetch projects');
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+
+  const fetchProjects = async (
+    pageIndex: number,
+    pageSize: number,
+    searchQuery: string,
+  ) => {
+    try {
+      const offset = pageIndex * pageSize;
+      const response = await request(
+        'GET',
+        `http://localhost:3001/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
+      );
+      const countResponse = await request(
+        'GET',
+        'http://localhost:3001/db/cleanProjectCount',
+      );
+      const projects = response.data.map((project: Project) => ({
+        ...project,
+        user_name: project.users[0]?.user_name || 'N/A',
+        year: new Date(project.timestamp).getFullYear(),
+      }));
+      setData(projects);
+      setPageCount(Math.ceil(countResponse.data.count / pageSize));
+      setLoading(false);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setError(error);
+      } else {
+        setError(new Error('An unexpected error occurred'));
+      }
+      setLoading(false);
     }
     const countResponse = await request(
       'GET',
@@ -244,14 +269,6 @@ export function DataTable() {
     if (!countResponse) {
       throw new Error('Failed to fetch project count');
     }
-    const projects = response.data.map((project: Project) => ({
-      ...project,
-      user_name: project.users[0]?.user_name || 'N/A',
-      year: new Date(project.timestamp).getFullYear(),
-    }));
-    setData(projects);
-    setPageCount(Math.ceil(countResponse.data.count / pageSize));
-    setLoading(false);
   };
 
   const table = useReactTable({
@@ -278,8 +295,13 @@ export function DataTable() {
   });
 
   React.useEffect(() => {
-    fetchProjects(pagination.pageIndex, pagination.pageSize);
-  }, [pagination.pageIndex, pagination.pageSize]);
+    fetchProjects(pagination.pageIndex, pagination.pageSize, searchQuery);
+  }, [pagination.pageIndex, pagination.pageSize, searchQuery]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    setPagination({ ...pagination, pageIndex: 0 });
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -294,12 +316,8 @@ export function DataTable() {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter by project name..."
-          value={
-            (table.getColumn('project_name')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(event) =>
-            table.getColumn('project_name')?.setFilterValue(event.target.value)
-          }
+          value={searchQuery}
+          onChange={handleSearchChange}
           className="max-w-sm"
         />
         <DropdownMenu>
