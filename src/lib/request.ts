@@ -11,23 +11,36 @@ async function request(method: string, url: string, data?: any) {
     });
   } catch (error) {
     if (axios.isAxiosError(error) && error?.response?.status === 403) {
-      const refreshTokenRes = await refreshAccessToken();
-      if (refreshTokenRes.status === 200) {
+      // try refreshing the access token
+      let refreshTokenRes;
+      try {
+        refreshTokenRes = await refreshAccessToken();
+      } catch (error) {
+        if (
+          axios.isAxiosError(refreshTokenRes) &&
+          (refreshTokenRes.status === 401 || refreshTokenRes.status === 403)
+        ) {
+          // redirect to login
+          throw new Error('redirect to login');
+        } else {
+          throw error;
+        }
+      }
+      // retry the request
+      try {
         response = await axios({
           method,
           url,
           data,
           withCredentials: true,
         });
-      } else {
-        // redirect to login
-        throw new Error('Unauthorized');
+      } catch (error) {
+        throw error;
       }
     } else if (axios.isAxiosError(error) && error?.response?.status === 401) {
-      // redirect to login
-      throw new Error('unauthenticated');
+      throw new Error('redirect to login');
     } else {
-      throw new Error('Unexpected error occured');
+      throw error;
     }
   }
   return response;
