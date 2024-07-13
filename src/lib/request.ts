@@ -21,9 +21,13 @@ async function request(method: string, url: string, data?: any) {
         });
       } else {
         // redirect to login
+        throw new Error('Unauthorized');
       }
-    } else {
+    } else if (axios.isAxiosError(error) && error?.response?.status === 401) {
       // redirect to login
+      throw new Error('unauthenticated');
+    } else {
+      throw new Error('Unexpected error occured');
     }
   }
   return response;
