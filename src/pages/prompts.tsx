@@ -19,11 +19,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import { Trash2Icon } from 'lucide-react';
-
+import { request } from '@/lib/request';
 interface Prompt {
-  _id: string; 
+  _id: string;
   title: string;
   type: string;
   system_prompt: string;
@@ -35,7 +35,9 @@ const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
   const [title, setTitle] = useState<string>('');
-  const [promptType, setPromptType] = useState<string>('itp_collective_consciousness_model');
+  const [promptType, setPromptType] = useState<string>(
+    'itp_collective_consciousness_model',
+  );
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [userPrompt, setUserPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -51,8 +53,8 @@ const PromptsPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:3001/db/prompts');
-      const data = await response.json();
+      const response = await request('GET', 'http://localhost:3001/db/prompts');
+      const data = response.data;
       setPrompts(data);
     } catch (error) {
       setError('Failed to fetch prompts. Please try again later.');
@@ -66,40 +68,36 @@ const PromptsPage: React.FC = () => {
     setError(null);
     setSuccess(null);
     try {
-      const response = currentPromptId 
-        ? await fetch(`http://localhost:3001/db/prompts/${currentPromptId}`, {
-            method: 'PUT',
-            body: JSON.stringify({
+      currentPromptId
+        ? await request(
+            'PUT',
+            `http://localhost:3001/db/prompts/${currentPromptId}`,
+            {
               title,
               type: promptType,
               system_prompt: systemPrompt,
               main_prompt: userPrompt,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
             },
-          })
-        : await fetch('http://localhost:3001/db/prompts', {
-            method: 'POST',
-            body: JSON.stringify({
-              title,
-              type: promptType,
-              system_prompt: systemPrompt,
-              main_prompt: userPrompt,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
+          )
+        : await request('POST', 'http://localhost:3001/db/prompts', {
+            title,
+            type: promptType,
+            system_prompt: systemPrompt,
+            main_prompt: userPrompt,
           });
-      
-      if (!response.ok) {
-        throw new Error(currentPromptId ? 'Failed to update the prompt' : 'Failed to save the prompt');
-      }
-      setSuccess(currentPromptId ? 'Prompt updated successfully!' : 'Prompt saved successfully!');
+      setSuccess(
+        currentPromptId
+          ? 'Prompt updated successfully!'
+          : 'Prompt saved successfully!',
+      );
       fetchPrompts();
       setCurrentPromptId(null); // Reset current prompt ID after save
     } catch (error) {
-      setError(currentPromptId ? 'Failed to update prompt. Please try again later.' : 'Failed to save prompt. Please try again later.');
+      setError(
+        currentPromptId
+          ? 'Failed to update prompt. Please try again later.'
+          : 'Failed to save prompt. Please try again later.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -116,12 +114,10 @@ const PromptsPage: React.FC = () => {
     setError(null);
     setSuccess(null);
     try {
-      const response = await fetch(`http://localhost:3001/db/prompts/${promptToDelete._id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete the prompt');
-      }
+      await request(
+        'DELETE',
+        `http://localhost:3001/db/prompts/${promptToDelete._id}`,
+      );
       setSuccess('Prompt deleted successfully!');
       fetchPrompts();
       setPromptToDelete(null); // Reset the prompt to delete after deletion
@@ -164,20 +160,32 @@ const PromptsPage: React.FC = () => {
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive" onClick={() => confirmDeletePrompt(prompt)}>
-                        <Trash2Icon className='h-4 w-4'/>
+                      <Button
+                        variant="destructive"
+                        onClick={() => confirmDeletePrompt(prompt)}
+                      >
+                        <Trash2Icon className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the prompt.
+                          This action cannot be undone. This will permanently
+                          delete the prompt.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setPromptToDelete(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={deletePrompt}>Delete</AlertDialogAction>
+                        <AlertDialogCancel
+                          onClick={() => setPromptToDelete(null)}
+                        >
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={deletePrompt}>
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -187,7 +195,7 @@ const PromptsPage: React.FC = () => {
           </div>
         </aside>
         <main className="w-full lg:w-2/3 bg-white p-6 rounded-lg border border-neutral-200">
-        <h2 className="text-xl font-semibold mb-4">Edit Prompt</h2>
+          <h2 className="text-xl font-semibold mb-4">Edit Prompt</h2>
           <div className="mb-4">
             <Input
               type="text"
@@ -236,14 +244,17 @@ const PromptsPage: React.FC = () => {
               className="w-full"
             />
           </div> */}
-          <Button onClick={savePrompt} disabled={isLoading} className="px-6 py-2 w-full">
-          Save Prompt
-        </Button>
+          <Button
+            onClick={savePrompt}
+            disabled={isLoading}
+            className="px-6 py-2 w-full"
+          >
+            Save Prompt
+          </Button>
         </main>
       </div>
 
-      <footer className="mt-8 flex justify-end">
-      </footer>
+      <footer className="mt-8 flex justify-end"></footer>
     </div>
   );
 };

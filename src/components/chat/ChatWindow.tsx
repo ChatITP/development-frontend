@@ -2,8 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatList from './ChatList';
 import ChatBottombar from './ChatBottombar';
 import LoadingDots from './LoadingDots';
-import axios from 'axios';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { request } from '@/lib/request';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { SaveIcon } from 'lucide-react';
 
@@ -33,7 +39,10 @@ const ChatWindow = () => {
   useEffect(() => {
     const fetchPrompts = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/db/prompts');
+        const response = await request(
+          'GET',
+          'http://localhost:3001/db/prompts',
+        );
         setPrompts(response.data);
         setSelectedPrompt(response.data[0]?.system_prompt || '');
       } catch (error) {
@@ -41,10 +50,13 @@ const ChatWindow = () => {
       }
     };
 
-    // sessions 
+    // sessions
     const fetchSessionIds = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/llm/sessions');
+        const response = await request(
+          'GET',
+          'http://localhost:3001/llm/sessions',
+        );
         setSessionIds(response.data.sessionIds);
       } catch (error) {
         console.error('Error fetching session IDs:', error);
@@ -57,7 +69,9 @@ const ChatWindow = () => {
 
   const initializeConversation = async (systemPrompt: string) => {
     try {
-      await axios.post('http://localhost:3001/llm/initialize', { systemPrompt });
+      await request('POST', 'http://localhost:3001/llm/initialize', {
+        systemPrompt,
+      });
     } catch (error) {
       console.error('Error initializing conversation:', error);
     }
@@ -68,9 +82,13 @@ const ChatWindow = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3001/llm/generate', {
-        userPrompt: message,
-      });
+      const response = await request(
+        'POST',
+        'http://localhost:3001/llm/generate',
+        {
+          userPrompt: message,
+        },
+      );
 
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -89,11 +107,18 @@ const ChatWindow = () => {
 
   const handleSaveSession = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/llm/save-session', { sessionId: selectedSessionId, messages });
+      const response = await request(
+        'POST',
+        'http://localhost:3001/llm/save-session',
+        { sessionId: selectedSessionId, messages },
+      );
       setSelectedSessionId(response.data.sessionId); // Update the session ID with the response
       alert('Session saved successfully.');
       // Fetch updated session IDs
-      const updatedSessionsResponse = await axios.get('http://localhost:3001/llm/sessions');
+      const updatedSessionsResponse = await request(
+        'GET',
+        'http://localhost:3001/llm/sessions',
+      );
       setSessionIds(updatedSessionsResponse.data.sessionIds);
     } catch (error) {
       console.error('Error saving session:', error);
@@ -107,17 +132,27 @@ const ChatWindow = () => {
         alert('Session ID is required to load the session.');
         return;
       }
-      const response = await axios.post('http://localhost:3001/llm/load-session', { sessionId });
-      const loadedMessages = response.data.messages.map((msg: { content: string; role: string }) => ({
-        text: msg.content,
-        sender: msg.role === 'user' ? 'user' : 'ai'
-      }));
+      const response = await request(
+        'POST',
+        'http://localhost:3001/llm/load-session',
+        { sessionId },
+      );
+      const loadedMessages = response.data.messages.map(
+        (msg: { content: string; role: string }) => ({
+          text: msg.content,
+          sender: msg.role === 'user' ? 'user' : 'ai',
+        }),
+      );
       setMessages(loadedMessages);
 
       // Initialize the conversation with loaded messages
-      await axios.post('http://localhost:3001/llm/initialize-with-messages', {
-        messages: response.data.messages
-      });
+      await request(
+        'POST',
+        'http://localhost:3001/llm/initialize-with-messages',
+        {
+          messages: response.data.messages,
+        },
+      );
     } catch (error) {
       console.error('Error loading session:', error);
       // alert('Failed to load session.');
@@ -126,7 +161,7 @@ const ChatWindow = () => {
 
   const handleResetSession = async () => {
     try {
-      await axios.post('http://localhost:3001/llm/reset-session');
+      await request('POST', 'http://localhost:3001/llm/reset-session');
       setMessages([]);
       alert('Session reset successfully.');
     } catch (error) {
@@ -157,7 +192,10 @@ const ChatWindow = () => {
     <div className="flex flex-col h-full w-full p-4 bg-white rounded-lg border border-neutral-300 shadow-md">
       <div className="mb-4 flex flex-col md:flex-row justify-between items-center">
         <div className="mb-4 md:mb-0">
-          <label htmlFor="promptSelector" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="promptSelector"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Select a Prompt:
           </label>
           <Select
@@ -177,7 +215,10 @@ const ChatWindow = () => {
           </Select>
         </div>
         <div className="mb-4 md:mb-0">
-          <label htmlFor="sessionSelector" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="sessionSelector"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Select a Session:
           </label>
           <Select
@@ -198,11 +239,11 @@ const ChatWindow = () => {
         </div>
         <div className="flex items-center">
           <Button
-            variant = "outline"
+            variant="outline"
             onClick={handleSaveSession}
             className="text-black px-4 py-2 rounded-lg"
           >
-            <SaveIcon className='h-4 w-4'/>
+            <SaveIcon className="h-4 w-4" />
           </Button>
         </div>
       </div>

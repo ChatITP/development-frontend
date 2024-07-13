@@ -266,9 +266,6 @@ export function DataTable() {
       'GET',
       'http://localhost:3001/db/cleanProjectCount',
     );
-    if (!countResponse) {
-      throw new Error('Failed to fetch project count');
-    }
   };
 
   const table = useReactTable({
