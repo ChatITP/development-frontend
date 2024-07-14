@@ -1,21 +1,46 @@
 import React from 'react';
 import Link from 'next/link';
 import { FaList, FaBars } from 'react-icons/fa';
-import { SquareChevronRight, Database, Workflow, MessageCircle } from "lucide-react";
-import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet';
+import {
+  SquareChevronRight,
+  Database,
+  Workflow,
+  MessageCircle,
+  LogIn,
+  LogOut,
+} from 'lucide-react';
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetClose,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { request } from '@/lib/request';
+import Router from 'next/router';
 
 const Sidebar: React.FC = () => {
+  const onLogout = async () => {
+    try {
+      await request('POST', 'http://localhost:3001/user/logout');
+      Router.push('/login');
+    } catch (error) {
+      console.error('Failed to logout');
+    }
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" className="text-gray-800">
-        <FaBars /> 
+          <FaBars />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="p-4 w-64 bg-white text-black border-l border-neutral-200 shadow-sm">
-        <SheetClose asChild>
-        </SheetClose>
+      <SheetContent
+        side="right"
+        className="p-4 w-64 bg-white text-black border-l border-neutral-200 shadow-sm"
+      >
+        <SheetClose asChild></SheetClose>
         <nav className="flex-grow mt-12">
           <ul>
             <li className="mb-4">
@@ -46,6 +71,20 @@ const Sidebar: React.FC = () => {
                 </p>
               </Link>
             </li>
+            <li className="mb-4">
+              <Link href="/login">
+                <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
+                  <LogIn className="mr-2" /> Login
+                </p>
+              </Link>
+            </li>
+            <li className="mb-4">
+              <button className="w-full" onClick={onLogout}>
+                <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
+                  <LogOut className="mr-2" /> Logout
+                </p>
+              </button>
+            </li>
           </ul>
         </nav>
       </SheetContent>
@@ -54,8 +93,3 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
-
-
-
-
-

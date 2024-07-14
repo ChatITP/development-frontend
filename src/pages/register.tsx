@@ -5,28 +5,39 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-const Login: React.FC = () => {
+const Register: React.FC = () => {
   const router = useRouter();
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const loginInfo = {
+      name: formData.get('user_name'),
       email: formData.get('user_email'),
       password: formData.get('user_password'),
+      earlyAccessCode: formData.get('user_code'),
     };
     try {
-      await axios.post('http://localhost:3001/user/login', loginInfo, {
+      await axios.post('http://localhost:3001/user/register', loginInfo, {
         withCredentials: true,
       });
-      router.replace('/');
+      router.replace('/login');
     } catch (error) {
-      console.error('Failed to login:', error);
+      console.error('Failed to register:', error);
     }
   };
   return (
-    <div className=" m-auto w-[400px]">
+    <div className="m-auto w-[400px]">
       <form onSubmit={handleFormSubmit} className="mt-12 max-w-96">
-        <div className="pb-4">
+        <div className="pb-6">
+          <label
+            htmlFor="user_name"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Name
+          </label>
+          <Input name="user_name" type="text" />
+        </div>
+        <div className="pb-6">
           <label
             htmlFor="user_email"
             className="block text-sm font-medium text-gray-700"
@@ -44,15 +55,25 @@ const Login: React.FC = () => {
           </label>
           <Input name="user_password" type="password" />
         </div>
-        <Button type="submit">Login</Button>
+        <div className="pb-6">
+          <label
+            htmlFor="user_code"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Early Access Code
+          </label>
+          <Input name="user_code" type="text" autoComplete="off" />
+        </div>
+
+        <Button type="submit">Register</Button>
       </form>
       <Link href="/register">
         <div className="mt-4 text-sm font-medium w-fit px-1 underline">
-          Register
+          Login
         </div>
       </Link>
     </div>
   );
 };
 
-export default Login;
+export default Register;

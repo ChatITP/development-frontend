@@ -18,9 +18,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <div
       className={`flex flex-col min-h-screen w-screen overflow-x-hidden ${inter.className}`}
     >
-      {router.pathname === '/login' ? null : <Navbar />}
+      {router.pathname === '/login' ||
+      router.pathname === '/register' ? null : (
+        <Navbar />
+      )}
       <main className="flex-grow  items-center justify-between">
-        {router.pathname === '/login' ? (
+        {router.pathname === '/login' || router.pathname === '/register' ? (
           children
         ) : (
           <AuthWrapper>{children}</AuthWrapper>
