@@ -32,10 +32,15 @@ const FlowCanvas: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
 
   const handleNodeChange = (id: string, data: any) => {
-    setNodes((nds) => nds.map((node) => (node.id === id ? { ...node, data } : node)));
+    setNodes((nds) =>
+      nds.map((node) => (node.id === id ? { ...node, data } : node)),
+    );
   };
 
   const collectNodeData = () => {
@@ -90,13 +95,17 @@ const FlowCanvas: React.FC = () => {
         drop(element);
       }
     },
-    [drop]
+    [drop],
   );
 
   return (
     <div className="flex">
       <Sidebar />
-      <div ref={setDropRef} style={{ width: '100%', height: '90vh' }} className="relative">
+      <div
+        ref={setDropRef}
+        style={{ width: '100%', height: '90vh' }}
+        className="relative"
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -110,7 +119,10 @@ const FlowCanvas: React.FC = () => {
           <Controls />
           <Background />
         </ReactFlow>
-        <button onClick={handleRun} className="absolute top-4 right-4 p-2 bg-blue-500 text-white rounded">
+        <button
+          onClick={handleRun}
+          className="absolute top-4 right-4 p-2 bg-blue-500 text-white rounded"
+        >
           Run All
         </button>
       </div>
@@ -118,8 +130,4 @@ const FlowCanvas: React.FC = () => {
   );
 };
 
-export default FlowCanvas
-
-
-
-
+export default FlowCanvas;

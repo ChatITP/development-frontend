@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { request } from '@/lib/request';
 import axios from 'axios';
 import {
   ColumnDef,
@@ -135,19 +136,15 @@ export function DataTable() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentProject) {
-      try {
-        await axios.put(
-          `http://localhost:3001/db/updateProject/${currentProject.project_id}`,
-          currentProject,
-        );
-        setIsDialogOpen(false);
-        fetchProjects(pagination.pageIndex, pagination.pageSize, searchQuery); 
-      } catch (error) {
-        console.error('Failed to update project:', error);
-      }
+      await request(
+        'PUT',
+        `http://localhost:3001/db/updateProject/${currentProject.project_id}`,
+        currentProject,
+      );
+      setIsDialogOpen(false);
+      fetchProjects(pagination.pageIndex, pagination.pageSize, searchQuery);
     }
   };
-
 
   const columns: ColumnDef<Project>[] = [
     {
@@ -241,10 +238,12 @@ export function DataTable() {
   ) => {
     try {
       const offset = pageIndex * pageSize;
-      const response = await axios.get(
+      const response = await request(
+        'GET',
         `http://localhost:3001/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
       );
-      const countResponse = await axios.get(
+      const countResponse = await request(
+        'GET',
         'http://localhost:3001/db/cleanProjectCount',
       );
       const projects = response.data.map((project: Project) => ({
@@ -263,6 +262,10 @@ export function DataTable() {
       }
       setLoading(false);
     }
+    const countResponse = await request(
+      'GET',
+      'http://localhost:3001/db/cleanProjectCount',
+    );
   };
 
   const table = useReactTable({
