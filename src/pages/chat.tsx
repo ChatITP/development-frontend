@@ -1,6 +1,6 @@
 import React from 'react';
 import ChatWindow from '../components/chat/ChatWindow';
-import ChatInterface from '@/components/chat/ChatInterace';
+import ChatInterface from '@/components/chat/ChatInterface';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ChatPage: React.FC = () => {
