@@ -28,7 +28,9 @@ interface Message {
 }
 
 const ChatWindow = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{ text: string; sender: string }[]>(
+    [],
+  );
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [sessionIds, setSessionIds] = useState<string[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
