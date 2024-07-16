@@ -24,7 +24,8 @@ const Login: React.FC = () => {
     }
   };
   return (
-    <div className=" m-auto w-[400px]">
+    <div className="flex justify-center items-center h-screen">
+      <div className="p-8 w-full max-w-md">
       <form onSubmit={handleFormSubmit} className="mt-12 max-w-96">
         <div className="pb-4">
           <label
@@ -44,13 +45,14 @@ const Login: React.FC = () => {
           </label>
           <Input name="user_password" type="password" />
         </div>
-        <Button type="submit">Login</Button>
+        <Button type="submit" className="w-full">Login</Button>
       </form>
       <Link href="/register">
-        <div className="mt-4 text-sm font-medium w-fit px-1 underline">
+        <div className="mt-4 text-sm font-medium w-fit underline">
           Register
         </div>
       </Link>
+      </div>
     </div>
   );
 };
