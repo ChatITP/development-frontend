@@ -8,6 +8,7 @@ import {
   MessageCircle,
   LogIn,
   LogOut,
+  Blocks
 } from 'lucide-react';
 import {
   Sheet,
@@ -43,13 +44,13 @@ const Sidebar: React.FC = () => {
         <SheetClose asChild></SheetClose>
         <nav className="flex-grow mt-12">
           <ul>
-            <li className="mb-4">
+            {/* <li className="mb-4">
               <Link href="/flows">
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
                   <Workflow className="mr-2" /> Flows
                 </p>
               </Link>
-            </li>
+            </li> */}
             <li className="mb-4">
               <Link href="/data">
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
@@ -72,12 +73,19 @@ const Sidebar: React.FC = () => {
               </Link>
             </li>
             <li className="mb-4">
+              <Link href="/canvas">
+                <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
+                  <Blocks className="mr-2" /> Blocks
+                </p>
+              </Link>
+            </li>
+            {/* <li className="mb-4">
               <Link href="/login">
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
                   <LogIn className="mr-2" /> Login
                 </p>
               </Link>
-            </li>
+            </li> */}
             <li className="mb-4">
               <button className="w-full" onClick={onLogout}>
                 <p className="flex items-center p-2 hover:bg-neutral-100 rounded-lg">
