@@ -37,31 +37,21 @@ interface BlockSelectorProps {
   onSelect: (text: string) => void;
 }
 
-const BlockSelector: React.FC<BlockSelectorProps> = ({
-  suggestions,
-  onSelect,
-}) => (
+const BlockSelector: React.FC<BlockSelectorProps> = ({ suggestions, onSelect }) => (
   <div className="flex flex-wrap mt-4 justify-center gap-2">
-    {suggestions.map(
-      (suggestion, index) =>
-        suggestion && (
-          <div key={index} className="m-1">
-            <Block text={suggestion} index={index} onSelect={onSelect} />
-          </div>
-        ),
-    )}
+    {suggestions.map((suggestion, index) => (
+      suggestion && (
+        <div key={index} className="m-1">
+          <Block text={suggestion} index={index} onSelect={onSelect} />
+        </div>
+      )
+    ))}
   </div>
 );
 
-const fetchSuggestionsFromBackend = async (
-  selectedBlocks: string[],
-): Promise<string[]> => {
+const fetchSuggestionsFromBackend = async (selectedBlocks: string[]): Promise<string[]> => {
   try {
-    const response = await request(
-      'POST',
-      'http://localhost:3001/llm/suggestions',
-      { selectedBlocks },
-    );
+    const response = await request('POST', 'http://localhost:3001/llm/suggestions', { selectedBlocks });
     return response.data;
   } catch (error) {
     console.error('Error fetching suggestions:', error);
@@ -71,15 +61,7 @@ const fetchSuggestionsFromBackend = async (
 
 const DottedLine: React.FC = () => (
   <svg width="32" height="2" className="mx-1">
-    <line
-      x1="0"
-      y1="1"
-      x2="32"
-      y2="1"
-      stroke="black"
-      strokeWidth="2"
-      strokeDasharray="2 4"
-    />
+    <line x1="0" y1="1" x2="32" y2="1" stroke="black" strokeWidth="2" strokeDasharray="2 4"/>
   </svg>
 );
 
@@ -90,14 +72,7 @@ interface Message {
 
 const ChatInterface: React.FC = () => {
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([
-    'what',
-    'who',
-    'when',
-    'where',
-    'why',
-    'how',
-  ]);
+  const [suggestions, setSuggestions] = useState<string[]>(['what', 'who', 'when', 'where', 'why', 'how']);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -112,30 +87,22 @@ const ChatInterface: React.FC = () => {
     } else {
       const newSelectedBlocks = [...selectedBlocks, text];
       setSelectedBlocks(newSelectedBlocks);
-      const newSuggestions =
-        await fetchSuggestionsFromBackend(newSelectedBlocks);
+      const newSuggestions = await fetchSuggestionsFromBackend(newSelectedBlocks);
       setSuggestions(newSuggestions);
     }
   };
-
+  
   const sendMessageToModel = async (question: string[]) => {
     setLoading(true);
     setShowSuggestions(false);
     try {
-      const response = await request(
-        'POST',
-        'http://localhost:3001/llm/generate',
-        {
-          userPrompt: question.join(' '),
-        },
-      );
+      const response = await request('POST', 'http://localhost:3001/llm/generate', {
+        userPrompt: question.join(' '),
+      });
       setMessages([...messages, { question, answer: response.data.content }]);
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages([
-        ...messages,
-        { question, answer: 'Failed to get a response from the model.' },
-      ]);
+      setMessages([...messages, { question, answer: 'Failed to get a response from the model.' }]);
     } finally {
       setLoading(false);
     }
@@ -166,7 +133,7 @@ const ChatInterface: React.FC = () => {
                 </React.Fragment>
               ))}
             </div>
-            <div className="bg-blue-100 p-4 rounded-md break-words whitespace-pre-wrap">
+            <div className="bg-blue-100 p-4 rounded-md w-fit overflow-scroll">
               <p>{message.answer}</p>
             </div>
           </div>
@@ -185,18 +152,11 @@ const ChatInterface: React.FC = () => {
               {selectedBlocks.length > 0 && (
                 <>
                   <DottedLine />
-                  <Block
-                    text="?"
-                    index={selectedBlocks.length}
-                    onSelect={handleBlockSelect}
-                  />
+                  <Block text="?" index={selectedBlocks.length} onSelect={handleBlockSelect} />
                 </>
               )}
             </div>
-            <BlockSelector
-              suggestions={suggestions}
-              onSelect={handleBlockSelect}
-            />
+            <BlockSelector suggestions={suggestions} onSelect={handleBlockSelect} />
           </>
         ) : (
           <div className="flex flex-col">
