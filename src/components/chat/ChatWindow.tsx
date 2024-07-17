@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { SaveIcon } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface Prompt {
   _id: string;
@@ -27,12 +28,21 @@ interface Message {
   sender: string;
 }
 
+interface Session {
+  sessionId: string;
+  createdAt: string;
+}
+
+const formatDate = (dateString: string) => {
+  return format(new Date(dateString), 'MMMM d, yyyy h:mm a');
+};
+
 const ChatWindow = () => {
   const [messages, setMessages] = useState<{ text: string; sender: string }[]>(
     [],
   );
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [sessionIds, setSessionIds] = useState<string[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,21 +62,20 @@ const ChatWindow = () => {
       }
     };
 
-    // sessions
-    const fetchSessionIds = async () => {
+    const fetchSessions = async () => {
       try {
         const response = await request(
           'GET',
           'http://localhost:3001/llm/sessions',
         );
-        setSessionIds(response.data.sessionIds);
+        setSessions(response.data.sessions || []);
       } catch (error) {
-        console.error('Error fetching session IDs:', error);
+        console.error('Error fetching sessions:', error);
       }
     };
 
     fetchPrompts();
-    fetchSessionIds();
+    fetchSessions();
   }, []);
 
   const initializeConversation = async (systemPrompt: string) => {
@@ -112,16 +121,19 @@ const ChatWindow = () => {
       const response = await request(
         'POST',
         'http://localhost:3001/llm/save-session',
-        { sessionId: selectedSessionId, messages },
+        {
+          sessionId: selectedSessionId,
+          messages,
+        },
       );
-      setSelectedSessionId(response.data.sessionId); // Update the session ID with the response
+      setSelectedSessionId(response.data.sessionId);
       alert('Session saved successfully.');
       // Fetch updated session IDs
       const updatedSessionsResponse = await request(
         'GET',
         'http://localhost:3001/llm/sessions',
       );
-      setSessionIds(updatedSessionsResponse.data.sessionIds);
+      setSessions(updatedSessionsResponse.data.sessions || []);
     } catch (error) {
       console.error('Error saving session:', error);
       alert('Failed to save session.');
@@ -231,9 +243,9 @@ const ChatWindow = () => {
               <SelectValue placeholder="Select a session" />
             </SelectTrigger>
             <SelectContent>
-              {sessionIds.map((id) => (
-                <SelectItem key={id} value={id}>
-                  {id}
+              {sessions.map((session) => (
+                <SelectItem key={session.sessionId} value={session.sessionId}>
+                  {formatDate(session.createdAt)}
                 </SelectItem>
               ))}
             </SelectContent>
