@@ -138,7 +138,7 @@ export function DataTable() {
     if (currentProject) {
       await request(
         'PUT',
-        `http://localhost:3001/db/updateProject/${currentProject.project_id}`,
+        `http://localhost:8000/api/db/updateProject/${currentProject.project_id}`,
         currentProject,
       );
       setIsDialogOpen(false);
@@ -240,11 +240,11 @@ export function DataTable() {
       const offset = pageIndex * pageSize;
       const response = await request(
         'GET',
-        `http://localhost:3001/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
+        `http://localhost:8000/api/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
       );
       const countResponse = await request(
         'GET',
-        'http://localhost:3001/db/cleanProjectCount',
+        'http://localhost:8000/api/db/cleanProjectCount',
       );
       const projects = response.data.map((project: Project) => ({
         ...project,
@@ -264,7 +264,7 @@ export function DataTable() {
     }
     const countResponse = await request(
       'GET',
-      'http://localhost:3001/db/cleanProjectCount',
+      'http://localhost:8000/api/db/cleanProjectCount',
     );
   };
 

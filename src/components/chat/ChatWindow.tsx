@@ -53,7 +53,7 @@ const ChatWindow = () => {
       try {
         const response = await request(
           'GET',
-          'http://localhost:3001/db/prompts',
+          'http://localhost:8000/api/db/prompts',
         );
         setPrompts(response.data);
         setSelectedPrompt(response.data[0]?.system_prompt || '');
@@ -66,7 +66,7 @@ const ChatWindow = () => {
       try {
         const response = await request(
           'GET',
-          'http://localhost:3001/llm/sessions',
+          'http://localhost:8000/api/llm/sessions',
         );
         setSessions(response.data.sessions || []);
       } catch (error) {
@@ -80,7 +80,7 @@ const ChatWindow = () => {
 
   const initializeConversation = async (systemPrompt: string) => {
     try {
-      await request('POST', 'http://localhost:3001/llm/initialize', {
+      await request('POST', 'http://localhost:8000/api/llm/initialize', {
         systemPrompt,
       });
     } catch (error) {
@@ -95,7 +95,7 @@ const ChatWindow = () => {
     try {
       const response = await request(
         'POST',
-        'http://localhost:3001/llm/generate',
+        'http://localhost:8000/api/llm/generate',
         {
           userPrompt: message,
         },
@@ -120,7 +120,7 @@ const ChatWindow = () => {
     try {
       const response = await request(
         'POST',
-        'http://localhost:3001/llm/save-session',
+        'http://localhost:8000/api/llm/save-session',
         {
           sessionId: selectedSessionId,
           messages,
@@ -131,7 +131,7 @@ const ChatWindow = () => {
       // Fetch updated session IDs
       const updatedSessionsResponse = await request(
         'GET',
-        'http://localhost:3001/llm/sessions',
+        'http://localhost:8000/api/llm/sessions',
       );
       setSessions(updatedSessionsResponse.data.sessions || []);
     } catch (error) {
@@ -148,7 +148,7 @@ const ChatWindow = () => {
       }
       const response = await request(
         'POST',
-        'http://localhost:3001/llm/load-session',
+        'http://localhost:8000/api/llm/load-session',
         { sessionId },
       );
       const loadedMessages = response.data.messages.map(
@@ -162,7 +162,7 @@ const ChatWindow = () => {
       // Initialize the conversation with loaded messages
       await request(
         'POST',
-        'http://localhost:3001/llm/initialize-with-messages',
+        'http://localhost:8000/api/llm/initialize-with-messages',
         {
           messages: response.data.messages,
         },
@@ -175,7 +175,7 @@ const ChatWindow = () => {
 
   const handleResetSession = async () => {
     try {
-      await request('POST', 'http://localhost:3001/llm/reset-session');
+      await request('POST', 'http://localhost:8000/api/llm/reset-session');
       setMessages([]);
       alert('Session reset successfully.');
     } catch (error) {

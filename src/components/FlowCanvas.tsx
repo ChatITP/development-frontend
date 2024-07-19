@@ -57,7 +57,7 @@ const FlowCanvas: React.FC = () => {
     console.log('Collected data:', collectedData);
 
     try {
-      const response = await axios.post('http://localhost:3001/', {
+      const response = await axios.post('http://localhost:8000/api', {
         nodes: collectedData,
       });
 

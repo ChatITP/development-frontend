@@ -53,7 +53,10 @@ const PromptsPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await request('GET', 'http://localhost:3001/db/prompts');
+      const response = await request(
+        'GET',
+        'http://localhost:8000/api/db/prompts',
+      );
       const data = response.data;
       setPrompts(data);
     } catch (error) {
@@ -71,7 +74,7 @@ const PromptsPage: React.FC = () => {
       currentPromptId
         ? await request(
             'PUT',
-            `http://localhost:3001/db/prompts/${currentPromptId}`,
+            `http://localhost:8000/api/db/prompts/${currentPromptId}`,
             {
               title,
               type: promptType,
@@ -79,7 +82,7 @@ const PromptsPage: React.FC = () => {
               main_prompt: userPrompt,
             },
           )
-        : await request('POST', 'http://localhost:3001/db/prompts', {
+        : await request('POST', 'http://localhost:8000/api/db/prompts', {
             title,
             type: promptType,
             system_prompt: systemPrompt,
@@ -116,7 +119,7 @@ const PromptsPage: React.FC = () => {
     try {
       await request(
         'DELETE',
-        `http://localhost:3001/db/prompts/${promptToDelete._id}`,
+        `http://localhost:8000/api/db/prompts/${promptToDelete._id}`,
       );
       setSuccess('Prompt deleted successfully!');
       fetchPrompts();
