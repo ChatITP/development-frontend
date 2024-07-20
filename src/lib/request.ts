@@ -47,7 +47,7 @@ async function request(method: string, url: string, data?: any) {
 }
 
 async function refreshAccessToken() {
-  return await axios.post('http://localhost:3001/user/refresh', null, {
+  return await axios.post('http://localhost:8000/api/user/refresh', null, {
     withCredentials: true,
   });
 }

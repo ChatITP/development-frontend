@@ -8,7 +8,7 @@ import {
   MessageCircle,
   LogIn,
   LogOut,
-  Blocks
+  Blocks,
 } from 'lucide-react';
 import {
   Sheet,
@@ -23,7 +23,7 @@ import Router from 'next/router';
 const Sidebar: React.FC = () => {
   const onLogout = async () => {
     try {
-      await request('POST', 'http://localhost:3001/user/logout');
+      await request('POST', 'http://localhost:8000/api/user/logout');
       Router.push('/login');
     } catch (error) {
       console.error('Failed to logout');
