@@ -13,9 +13,12 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
   const isAuthenticated = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/user/verify', {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        process.env.NEXT_PUBLIC_API_URL + '/user/verify',
+        {
+          withCredentials: true,
+        },
+      );
       if (res.status === 200) {
         setIsLoggedIn('true');
         return;
@@ -23,7 +26,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
         try {
-          await axios.post('http://localhost:8000/api/user/refresh', {
+          await axios.post(process.env.NEXT_PUBLIC_API_URL + '/user/refresh', {
             withCredentials: true,
           });
           setIsLoggedIn('true');
@@ -42,7 +45,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   useEffect(() => {
     isAuthenticated();
   });
-
   if (isLoggedIn === 'pending') {
     return <div>Loading...</div>;
   }

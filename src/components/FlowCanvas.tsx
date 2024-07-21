@@ -57,9 +57,12 @@ const FlowCanvas: React.FC = () => {
     console.log('Collected data:', collectedData);
 
     try {
-      const response = await axios.post('http://localhost:8000/api', {
-        nodes: collectedData,
-      });
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_URL as string,
+        {
+          nodes: collectedData,
+        },
+      );
 
       console.log('Response from backend:', response.data);
     } catch (error) {

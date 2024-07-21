@@ -59,7 +59,7 @@ const fetchSuggestionsFromBackend = async (
   try {
     const response = await request(
       'POST',
-      'http://localhost:8000/api/llm/suggestions',
+      process.env.NEXT_PUBLIC_API_URL + '/llm/suggestions',
       { selectedBlocks },
     );
     return response.data;
@@ -124,7 +124,7 @@ const ChatInterface: React.FC = () => {
     try {
       const response = await request(
         'POST',
-        'http://localhost:8000/api/llm/generate',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/generate',
         {
           userPrompt: question.join(' '),
         },

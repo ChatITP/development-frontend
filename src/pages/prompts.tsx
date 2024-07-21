@@ -55,7 +55,7 @@ const PromptsPage: React.FC = () => {
     try {
       const response = await request(
         'GET',
-        'http://localhost:8000/api/db/prompts',
+        process.env.NEXT_PUBLIC_API_URL + '/db/prompts',
       );
       const data = response.data;
       setPrompts(data);
@@ -74,7 +74,7 @@ const PromptsPage: React.FC = () => {
       currentPromptId
         ? await request(
             'PUT',
-            `http://localhost:8000/api/db/prompts/${currentPromptId}`,
+            process.env.NEXT_PUBLIC_API_URL + `/db/prompts/${currentPromptId}`,
             {
               title,
               type: promptType,
@@ -82,12 +82,16 @@ const PromptsPage: React.FC = () => {
               main_prompt: userPrompt,
             },
           )
-        : await request('POST', 'http://localhost:8000/api/db/prompts', {
-            title,
-            type: promptType,
-            system_prompt: systemPrompt,
-            main_prompt: userPrompt,
-          });
+        : await request(
+            'POST',
+            process.env.NEXT_PUBLIC_API_URL + '/db/prompts',
+            {
+              title,
+              type: promptType,
+              system_prompt: systemPrompt,
+              main_prompt: userPrompt,
+            },
+          );
       setSuccess(
         currentPromptId
           ? 'Prompt updated successfully!'
@@ -119,7 +123,7 @@ const PromptsPage: React.FC = () => {
     try {
       await request(
         'DELETE',
-        `http://localhost:8000/api/db/prompts/${promptToDelete._id}`,
+        process.env.NEXT_PUBLIC_API_URL + `/db/prompts/${promptToDelete._id}`,
       );
       setSuccess('Prompt deleted successfully!');
       fetchPrompts();

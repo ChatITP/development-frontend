@@ -53,7 +53,7 @@ const ChatWindow = () => {
       try {
         const response = await request(
           'GET',
-          'http://localhost:8000/api/db/prompts',
+          process.env.NEXT_PUBLIC_API_URL + '/db/prompts',
         );
         setPrompts(response.data);
         setSelectedPrompt(response.data[0]?.system_prompt || '');
@@ -66,7 +66,7 @@ const ChatWindow = () => {
       try {
         const response = await request(
           'GET',
-          'http://localhost:8000/api/llm/sessions',
+          process.env.NEXT_PUBLIC_API_URL + '/llm/sessions',
         );
         setSessions(response.data.sessions || []);
       } catch (error) {
@@ -80,9 +80,13 @@ const ChatWindow = () => {
 
   const initializeConversation = async (systemPrompt: string) => {
     try {
-      await request('POST', 'http://localhost:8000/api/llm/initialize', {
-        systemPrompt,
-      });
+      await request(
+        'POST',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/initialize',
+        {
+          systemPrompt,
+        },
+      );
     } catch (error) {
       console.error('Error initializing conversation:', error);
     }
@@ -95,7 +99,7 @@ const ChatWindow = () => {
     try {
       const response = await request(
         'POST',
-        'http://localhost:8000/api/llm/generate',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/generate',
         {
           userPrompt: message,
         },
@@ -120,7 +124,7 @@ const ChatWindow = () => {
     try {
       const response = await request(
         'POST',
-        'http://localhost:8000/api/llm/save-session',
+        process.env.NEXT_PUBLIC_API_URL + '/api/llm/save-session',
         {
           sessionId: selectedSessionId,
           messages,
@@ -131,7 +135,7 @@ const ChatWindow = () => {
       // Fetch updated session IDs
       const updatedSessionsResponse = await request(
         'GET',
-        'http://localhost:8000/api/llm/sessions',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/sessions',
       );
       setSessions(updatedSessionsResponse.data.sessions || []);
     } catch (error) {
@@ -148,7 +152,7 @@ const ChatWindow = () => {
       }
       const response = await request(
         'POST',
-        'http://localhost:8000/api/llm/load-session',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/load-session',
         { sessionId },
       );
       const loadedMessages = response.data.messages.map(
@@ -162,7 +166,7 @@ const ChatWindow = () => {
       // Initialize the conversation with loaded messages
       await request(
         'POST',
-        'http://localhost:8000/api/llm/initialize-with-messages',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/initialize-with-messages',
         {
           messages: response.data.messages,
         },
@@ -175,7 +179,10 @@ const ChatWindow = () => {
 
   const handleResetSession = async () => {
     try {
-      await request('POST', 'http://localhost:8000/api/llm/reset-session');
+      await request(
+        'POST',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/reset-session',
+      );
       setMessages([]);
       alert('Session reset successfully.');
     } catch (error) {

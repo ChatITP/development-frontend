@@ -13,7 +13,6 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const router = useRouter();
-
   return (
     <div
       className={`flex flex-col min-h-screen w-screen overflow-x-hidden ${inter.className}`}
