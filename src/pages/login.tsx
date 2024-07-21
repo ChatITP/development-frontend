@@ -15,9 +15,13 @@ const Login: React.FC = () => {
       password: formData.get('user_password'),
     };
     try {
-      await axios.post('http://localhost:8000/api/user/login', loginInfo, {
-        withCredentials: true,
-      });
+      await axios.post(
+        process.env.NEXT_PUBLIC_API_URL + '/user/login',
+        loginInfo,
+        {
+          withCredentials: true,
+        },
+      );
       router.replace('/');
     } catch (error) {
       console.error('Failed to login:', error);

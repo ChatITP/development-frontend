@@ -23,7 +23,7 @@ import Router from 'next/router';
 const Sidebar: React.FC = () => {
   const onLogout = async () => {
     try {
-      await request('POST', 'http://localhost:8000/api/user/logout');
+      await request('POST', process.env.NEXT_PUBLIC_API_URL + '/user/logout');
       Router.push('/login');
     } catch (error) {
       console.error('Failed to logout');

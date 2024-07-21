@@ -138,7 +138,8 @@ export function DataTable() {
     if (currentProject) {
       await request(
         'PUT',
-        `http://localhost:8000/api/db/updateProject/${currentProject.project_id}`,
+        process.env.NEXT_PUBLIC_API_URL +
+          `/db/updateProject/${currentProject.project_id}`,
         currentProject,
       );
       setIsDialogOpen(false);
@@ -240,11 +241,12 @@ export function DataTable() {
       const offset = pageIndex * pageSize;
       const response = await request(
         'GET',
-        `http://localhost:8000/api/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
+        process.env.NEXT_PUBLIC_API_URL +
+          `/db/getCleanPaginated?limit=${pageSize}&offset=${offset}&search=${searchQuery}`,
       );
       const countResponse = await request(
         'GET',
-        'http://localhost:8000/api/db/cleanProjectCount',
+        process.env.NEXT_PUBLIC_API_URL + '/db/cleanProjectCount',
       );
       const projects = response.data.map((project: Project) => ({
         ...project,
@@ -264,7 +266,7 @@ export function DataTable() {
     }
     const countResponse = await request(
       'GET',
-      'http://localhost:8000/api/db/cleanProjectCount',
+      process.env.NEXT_PUBLIC_API_URL + '/db/cleanProjectCount',
     );
   };
 
