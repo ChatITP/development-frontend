@@ -101,7 +101,37 @@ const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
   const chatListRef = useRef<HTMLDivElement>(null);
+
+  const initializeChat = async () => {
+    try {
+      const response = await request(
+        'GET',
+        `${process.env.NEXT_PUBLIC_API_URL}/db/prompts?title=default_conversational&type=itp_collective_consciousness_model`
+      );
+      
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const fetchedPrompt = response.data[0];
+        console.log(fetchedPrompt.system_prompt)
+        setSystemPrompt(fetchedPrompt.system_prompt);
+  
+        await request(
+          'POST',
+          process.env.NEXT_PUBLIC_API_URL + '/llm/initialize',
+          { systemPrompt: fetchedPrompt.system_prompt }
+        );
+      } else {
+        console.error('No matching prompt found');
+      }
+    } catch (error) {
+      console.error('Error initializing chat:', error);
+    }
+  };
+
+  useEffect(() => {
+    initializeChat();
+  }, []);
 
   const handleBlockSelect = async (text: string) => {
     if (text === '?') {
@@ -121,6 +151,7 @@ const ChatInterface: React.FC = () => {
   const sendMessageToModel = async (question: string[]) => {
     setLoading(true);
     setShowSuggestions(false);
+    console.log(question.join(' '))
     try {
       const response = await request(
         'POST',
