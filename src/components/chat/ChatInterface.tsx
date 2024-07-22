@@ -113,7 +113,6 @@ const ChatInterface: React.FC = () => {
       
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         const fetchedPrompt = response.data[0];
-        console.log(fetchedPrompt.system_prompt)
         setSystemPrompt(fetchedPrompt.system_prompt);
   
         await request(
