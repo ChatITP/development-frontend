@@ -31,11 +31,22 @@ const DraggableChatInterface: React.FC<DraggableChatInterfaceProps> = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      let target = e.target as HTMLElement;
+      while (target && target !== e.currentTarget) {
+        if (target.getAttribute('data-no-drag') !== null) {
+          // console.log('No drag attribute found on:', target);
+          return;
+        }
+        target = target.parentElement as HTMLElement;
+      }
+  
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) {
+        return;
+      }
       e.preventDefault();
       isDraggingRef.current = true;
       const startX = e.clientX - position.x;
       const startY = e.clientY - position.y;
-
       const handleMouseMove = (e: MouseEvent) => {
         if (isDraggingRef.current) {
           setPosition({
@@ -59,7 +70,12 @@ const DraggableChatInterface: React.FC<DraggableChatInterfaceProps> = ({
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation();
+      if (
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLButtonElement)
+      ) {
+        e.stopPropagation();
+      }
       onClick();
     },
     [onClick],
