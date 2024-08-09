@@ -124,7 +124,7 @@ const ChatWindow = () => {
     try {
       const response = await request(
         'POST',
-        process.env.NEXT_PUBLIC_API_URL + '/api/llm/save-session',
+        process.env.NEXT_PUBLIC_API_URL + '/llm/save-session',
         {
           sessionId: selectedSessionId,
           messages,

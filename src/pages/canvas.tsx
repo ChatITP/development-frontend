@@ -54,7 +54,11 @@ const CanvasPage: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (canvasRef.current && interfaces.length < MAX_INTERFACES) {
+    if (
+      canvasRef.current &&
+      interfaces.length < MAX_INTERFACES &&
+      event.target === canvasRef.current
+    ) {
       const rect = canvasRef.current.getBoundingClientRect();
       const newInterface = {
         id: Date.now(),
@@ -65,21 +69,22 @@ const CanvasPage: React.FC = () => {
     }
   };
 
+
   const handleInterfaceClick = useCallback((id: number) => {
-    console.log('Interface clicked:', id);
     setSelectedInterfaceId(id);
-    if (canvasRef.current) {
+    if (canvasRef.current && !document.activeElement?.matches('input, textarea, select')) {
       canvasRef.current.focus();
     }
   }, []);
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      console.log('Key pressed:', event.key);
-      console.log('Selected interface:', selectedInterfaceId);
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (
         (event.key === 'Delete' || event.key === 'Backspace') &&
-        selectedInterfaceId !== null
+        selectedInterfaceId !== null &&
+        !(event.target instanceof Element && event.target.matches('input, textarea, select')) &&
+        !document.activeElement?.matches('input, textarea, select')
       ) {
         event.preventDefault();
         setInterfaces((prevInterfaces) =>
@@ -88,32 +93,20 @@ const CanvasPage: React.FC = () => {
           ),
         );
         setSelectedInterfaceId(null);
-        console.log('Interface deleted');
       }
-    },
-    [selectedInterfaceId],
-  );
-
-  const handleCanvasClick = useCallback((event: MouseEvent) => {
-    if (canvasRef.current && event.target === canvasRef.current) {
-      setSelectedInterfaceId(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('click', handleCanvasClick);
-    return () => {
-      document.removeEventListener('click', handleCanvasClick);
     };
-  }, [handleCanvasClick]);
+  
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedInterfaceId]);
 
   return (
     <div
       ref={canvasRef}
-      className="w-full h-full bg-gray-100 relative outline-none"
+      className="w-full h-full bg-gray-100 relative"
       onDoubleClick={handleDoubleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
       style={{ minHeight: 'calc(100vh - 64px - 64px)' }}
     >
       <UsageInstructions
