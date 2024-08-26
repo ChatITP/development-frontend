@@ -26,6 +26,8 @@ interface Prompt {
 interface Message {
   text: string;
   sender: string;
+  type: 'text' | 'image';
+  imageUrl?: string;
 }
 
 interface Session {
@@ -38,9 +40,7 @@ const formatDate = (dateString: string) => {
 };
 
 const ChatWindow = () => {
-  const [messages, setMessages] = useState<{ text: string; sender: string }[]>(
-    [],
-  );
+  const [messages, setMessages] = useState<Message[]>([]);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
@@ -93,7 +93,7 @@ const ChatWindow = () => {
   };
 
   const handleSendMessage = async (message: string) => {
-    setMessages([...messages, { text: message, sender: 'user' }]);
+    setMessages([...messages, { text: message, sender: 'user', type: 'text' }]);
     setLoading(true);
 
     try {
@@ -102,23 +102,41 @@ const ChatWindow = () => {
         process.env.NEXT_PUBLIC_API_URL + '/llm/generate',
         {
           userPrompt: message,
-        },
+        }
       );
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: response.data.content, sender: 'ai' },
-      ]);
+      if (response.data.type === 'image') {
+        const { imageUrl, text } = response.data.content;
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            text: text, 
+            sender: 'ai',
+            type: 'image',
+            imageUrl: imageUrl,
+          },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { 
+            text: response.data.content, 
+            sender: 'ai', 
+            type: 'text'
+          },
+        ]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: 'Failed to get a response from the model.', sender: 'ai' },
+        { text: 'Failed to get a response from the model.', sender: 'ai', type: 'text' },
       ]);
       setLoading(false);
     }
   };
+
 
   const handleSaveSession = async () => {
     try {
@@ -156,9 +174,11 @@ const ChatWindow = () => {
         { sessionId },
       );
       const loadedMessages = response.data.messages.map(
-        (msg: { content: string; role: string }) => ({
+        (msg: { content: string; role: string; type: 'text' | 'image'; imageUrl?: string }) => ({
           text: msg.content,
           sender: msg.role === 'user' ? 'user' : 'ai',
+          type: msg.type || 'text',
+          imageUrl: msg.imageUrl || '',
         }),
       );
       setMessages(loadedMessages);
@@ -175,7 +195,7 @@ const ChatWindow = () => {
       console.error('Error loading session:', error);
       // alert('Failed to load session.');
     }
-  };
+  };  
 
   const handleResetSession = async () => {
     try {
