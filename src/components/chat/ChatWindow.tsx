@@ -109,8 +109,12 @@ const ChatWindow = () => {
         const { imageUrl, text } = response.data.content;
         setMessages((prevMessages) => [
           ...prevMessages,
-          { text, sender: 'ai', type: 'text' },
-          { text: imageUrl, sender: 'ai', type: 'image', imageUrl },
+          {
+            text: text, 
+            sender: 'ai',
+            type: 'image',
+            imageUrl: imageUrl,
+          },
         ]);
       } else {
         setMessages((prevMessages) => [
@@ -170,10 +174,11 @@ const ChatWindow = () => {
         { sessionId },
       );
       const loadedMessages = response.data.messages.map(
-        (msg: { content: string; role: string; type: 'text' | 'image' }) => ({
+        (msg: { content: string; role: string; type: 'text' | 'image'; imageUrl?: string }) => ({
           text: msg.content,
           sender: msg.role === 'user' ? 'user' : 'ai',
           type: msg.type || 'text',
+          imageUrl: msg.imageUrl || '',
         }),
       );
       setMessages(loadedMessages);
@@ -190,7 +195,7 @@ const ChatWindow = () => {
       console.error('Error loading session:', error);
       // alert('Failed to load session.');
     }
-  };
+  };  
 
   const handleResetSession = async () => {
     try {

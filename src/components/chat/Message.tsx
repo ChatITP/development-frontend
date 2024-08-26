@@ -18,11 +18,10 @@ export const Message: React.FC<MessageProps> = ({ text, sender, type, imageUrl }
   return (
     <div className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
       <Card className={`p-3 rounded-lg max-w-lg ${messageStyles}`}>
-        {type === 'text' ? (
-          <ReactMarkdown>{text}</ReactMarkdown>
-        ) : (
-          <img src={imageUrl || text} alt="AI generated image" className="w-full h-auto rounded" />
+        {type === 'image' && imageUrl && (
+          <img src={imageUrl} alt="AI generated image" className="w-full h-auto rounded mb-2" />
         )}
+        {text && <ReactMarkdown>{text}</ReactMarkdown>}
       </Card>
     </div>
   );
